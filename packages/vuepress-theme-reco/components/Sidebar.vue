@@ -1,8 +1,7 @@
 <template>
   <aside class="sidebar">
-    <PersonalInfo/>
-    <NavLinks/>
     <slot name="top"/>
+    <NavLinks/>
     <SidebarLinks :depth="0" :items="items"/>
     <slot name="bottom"/>
   </aside>
@@ -10,13 +9,12 @@
 
 <script>
 import SidebarLinks from '@theme/components/SidebarLinks'
-import PersonalInfo from '@theme/components/PersonalInfo'
 import NavLinks from '@theme/components/NavLinks'
 
 export default {
   name: 'Sidebar',
 
-  components: { SidebarLinks, NavLinks, PersonalInfo },
+  components: { SidebarLinks, NavLinks },
 
   props: ['items']
 }

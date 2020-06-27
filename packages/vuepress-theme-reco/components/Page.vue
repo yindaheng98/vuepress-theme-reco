@@ -72,6 +72,8 @@
     <ModuleTransition delay="0.32">
       <Comments v-if="recoShowModule" :isShowComments="shouldShowComments"/>
     </ModuleTransition>
+
+    <SubSiderbar class="sider-bar" />
   </main>
 </template>
 
@@ -80,10 +82,11 @@ import PageInfo from '@theme/components/PageInfo'
 import { resolvePage, outboundRE, endingSlashRE } from '@theme/helpers/utils'
 import ModuleTransition from '@theme/components/ModuleTransition'
 import moduleTransitonMixin from '@theme/mixins/moduleTransiton'
+import SubSiderbar from '@theme/components/SubSiderbar'
 
 export default {
   mixins: [moduleTransitonMixin],
-  components: { PageInfo, ModuleTransition },
+  components: { PageInfo, ModuleTransition, SubSiderbar },
 
   props: ['sidebarItems'],
 
@@ -234,9 +237,15 @@ function flatten (items, res) {
 @require '../styles/wrapper.styl'
 
 .page
+  position relative
   padding-top 5rem
   padding-bottom 2rem
+  padding-right 10rem
   display block
+  .sider-bar
+    position fixed
+    top 10rem
+    right 2rem
   .page-title
     max-width: $contentWidth;
     margin: 0 auto;
@@ -278,14 +287,18 @@ function flatten (items, res) {
     float right
 
 @media (max-width: $MQMobile)
-  .page-title
-    padding: 0 1rem;
-  .page-edit
-    .edit-link
-      margin-bottom .5rem
-    .last-updated
-      font-size .8em
-      float none
-      text-align left
+  .page
+    padding-right 0
+    .sider-bar
+      display none
+    .page-title
+      padding: 0 1rem;
+    .page-edit
+      .edit-link
+        margin-bottom .5rem
+      .last-updated
+        font-size .8em
+        float none
+        text-align left
 
 </style>

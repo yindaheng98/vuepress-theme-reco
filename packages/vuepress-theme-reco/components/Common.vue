@@ -23,9 +23,9 @@
         <Sidebar
           :items="sidebarItems"
           @toggle-sidebar="toggleSidebar">
-          <slot
-            name="sidebar-top"
-            slot="top"/>
+          <template slot="top">
+            <PersonalInfo />
+          </template>
           <slot
             name="sidebar-bottom"
             slot="bottom"/>
@@ -53,9 +53,9 @@
           <Sidebar
             :items="sidebarItems"
             @toggle-sidebar="toggleSidebar">
-            <slot
-              name="sidebar-top"
-              slot="top"/>
+            <template slot="top">
+              <PersonalInfo />
+            </template>
             <slot
               name="sidebar-bottom"
               slot="bottom"/>
@@ -74,6 +74,7 @@
 <script>
 import Navbar from '@theme/components/Navbar'
 import Sidebar from '@theme/components/Sidebar'
+import PersonalInfo from '@theme/components/PersonalInfo'
 import { resolveSidebarItems } from '@theme/helpers/utils'
 import Password from '@theme/components/Password'
 import { setTimeout } from 'timers'
@@ -82,7 +83,7 @@ import moduleTransitonMixin from '@theme/mixins/moduleTransiton'
 export default {
   mixins: [moduleTransitonMixin],
 
-  components: { Sidebar, Navbar, Password },
+  components: { Sidebar, Navbar, Password, PersonalInfo },
 
   props: {
     sidebar: {

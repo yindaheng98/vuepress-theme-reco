@@ -75,7 +75,6 @@
 import Navbar from '@theme/components/Navbar'
 import Sidebar from '@theme/components/Sidebar'
 import PersonalInfo from '@theme/components/PersonalInfo'
-import { resolveSidebarItems } from '@theme/helpers/utils'
 import Password from '@theme/components/Password'
 import { setTimeout } from 'timers'
 import moduleTransitonMixin from '@theme/mixins/moduleTransiton'
@@ -89,6 +88,10 @@ export default {
     sidebar: {
       type: Boolean,
       default: true
+    },
+    sidebarItems: {
+      type: Array,
+      default: () => []
     }
   },
 
@@ -131,15 +134,6 @@ export default {
         !frontmatter.home &&
         frontmatter.sidebar !== false &&
         this.sidebarItems.length
-      )
-    },
-
-    sidebarItems () {
-      return resolveSidebarItems(
-        this.$page,
-        this.$page.regularPath,
-        this.$site,
-        this.$localePath
       )
     },
 

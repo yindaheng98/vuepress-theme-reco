@@ -73,7 +73,7 @@
       <Comments v-if="recoShowModule" :isShowComments="shouldShowComments"/>
     </ModuleTransition>
 
-    <SubSiderbar class="sider-bar" />
+    <SubSidebar class="side-bar" />
   </main>
 </template>
 
@@ -82,11 +82,11 @@ import PageInfo from '@theme/components/PageInfo'
 import { resolvePage, outboundRE, endingSlashRE } from '@theme/helpers/utils'
 import ModuleTransition from '@theme/components/ModuleTransition'
 import moduleTransitonMixin from '@theme/mixins/moduleTransiton'
-import SubSiderbar from '@theme/components/SubSiderbar'
+import SubSidebar from '@theme/components/SubSidebar'
 
 export default {
   mixins: [moduleTransitonMixin],
-  components: { PageInfo, ModuleTransition, SubSiderbar },
+  components: { PageInfo, ModuleTransition, SubSidebar },
 
   props: ['sidebarItems'],
 
@@ -242,10 +242,15 @@ function flatten (items, res) {
   padding-bottom 2rem
   padding-right 10rem
   display block
-  .sider-bar
+  .side-bar
     position fixed
     top 10rem
+    bottom 10rem
     right 2rem
+    overflow-y scroll
+    &::-webkit-scrollbar
+      width: 0
+      height: 0
   .page-title
     max-width: $contentWidth;
     margin: 0 auto;
@@ -289,7 +294,7 @@ function flatten (items, res) {
 @media (max-width: $MQMobile)
   .page
     padding-right 0
-    .sider-bar
+    .side-bar
       display none
     .page-title
       padding: 0 1rem;

@@ -8,25 +8,9 @@ export default {
       return headers
     }
   },
-  mounted () {
-    this.activationLink()
-  },
   methods: {
     isLinkActive (header) {
       return isActive(this.$route, this.$page.path + '#' + header.slug)
-    },
-    activationLink () {
-      const subtitleName = decodeURIComponent(this.$route.fullPath)
-      if (!subtitleName || subtitleName == '') return
-      // eslint-disable-next-line no-undef
-      const subtitles = [].slice.call(document.querySelectorAll('.sub-sidebar-wrapper li'))
-      for (let i = 0; i < subtitles.length; i++) {
-        if (decodeURIComponent(subtitles[i].getAttribute('href')).indexOf(subtitleName) != -1) {
-          subtitles[i].click()
-          this.activationAnchor()
-          return
-        }
-      }
     }
   },
   render (h) {

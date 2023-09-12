@@ -20,7 +20,6 @@ module.exports = (options, ctx) => ({
 
   plugins: [
     '@vuepress-reco/back-to-top',
-    '@vuepress-reco/loading-page',
     '@vuepress-reco/pagation',
     '@vuepress-reco/comments',
     '@vuepress/active-header-links',
@@ -54,26 +53,24 @@ module.exports = (options, ctx) => ({
         }
       ]
     }],
+    'vuepress-plugin-smooth-scroll',
     ['container', {
       type: 'tip',
-      defaultTitle: {
-        '/': '',
-        '/zh/': '提示'
-      }
+      before: info => `<div class="custom-block tip"><p class="title">${info}</p>`,
+      after: '</div>',
+      defaultTitle: ''
     }],
     ['container', {
       type: 'warning',
-      defaultTitle: {
-        '/': '',
-        '/zh/': '注意'
-      }
+      before: info => `<div class="custom-block warning"><p class="title">${info}</p>`,
+      after: '</div>',
+      defaultTitle: ''
     }],
     ['container', {
       type: 'danger',
-      defaultTitle: {
-        '/': '',
-        '/zh/': '警告'
-      }
+      before: info => `<div class="custom-block danger"><p class="title">${info}</p>`,
+      after: '</div>',
+      defaultTitle: ''
     }],
     ['container', {
       type: 'right',
@@ -82,7 +79,8 @@ module.exports = (options, ctx) => ({
     ['container', {
       type: 'theorem',
       before: info => `<div class="custom-block theorem"><p class="title">${info}</p>`,
-      after: '</div>'
+      after: '</div>',
+      defaultTitle: ''
     }],
     ['container', {
       type: 'details',

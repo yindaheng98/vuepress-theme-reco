@@ -9,7 +9,15 @@ module.exports = {
   base: '/reco-example-test/',
   // theme: 'reco',
   theme: require.resolve('../../packages/vuepress-theme-reco'),
+  locales: {
+    // 键名是该语言所属的子路径
+    // 作为特例，默认语言可以使用 '/' 作为其路径。
+    '/': {
+      lang: 'zh-CN',
+    },
+  },
   themeConfig: {
+    lastUpdated: false,
     nav: [
       { text: 'Home', link: '/', icon: 'reco-home' },
       { text: 'TimeLine', link: '/timeline/', icon: 'reco-date' },
@@ -47,12 +55,16 @@ module.exports = {
     blogConfig: {
       category: {
         location: 2, // 在导航栏菜单中所占的位置，默认2
-        text: 'Category' // 默认 “分类”
+        // text: 'Categories' // 默认 “分类”
       },
       tag: {
         location: 3, // 在导航栏菜单中所占的位置，默认3
-        text: 'Tag' // 默认 “标签”
-      }
+        // text: 'Tags' // 默认 “标签”
+      },
+      socialLinks: [
+        { icon: 'reco-github', link: 'https://github.com/recoluan' },
+        { icon: 'fa-camera', link: 'https://www.npmjs.com/~reco_luan' }
+      ]
     },
     logo: '/head.png',
     authorAvatar: '/head.png',
@@ -60,14 +72,17 @@ module.exports = {
     search: true,
     searchMaxSuggestions: 10,
     // 自动形成侧边导航
-    // sidebar: 'auto',
+    subSidebar: 'auto',
     sidebarDepth: 4,
     // 最后更新时间
-    lastUpdated: 'Last Updated',
+    // lastUpdated: 'Last Updated',
     // 作者
     author: 'reco_luan',
     // 备案号
     record: 'xxxx',
+    recordLink: 'http://www.baidu.com',
+    cyberSecurityRecord: '2222',
+    cyberSecurityLink: 'http://www.baidu.com',
     // 项目开始时间
     startYear: '2017',
     /**
@@ -98,5 +113,32 @@ module.exports = {
      * 'tomorrow'
      * 'twilight'
      */
-  }
+  },
+  plugins: [
+    ['@vuepress-reco/vuepress-plugin-bulletin-popover', {
+      body: [
+        {
+          type: 'title',
+          content: '欢迎加入QQ交流群 🎉🎉🎉',
+          style: 'text-aligin: center;'
+        },
+        {
+          type: 'image',
+          src: '/rvcode_qq.png'
+        }
+      ],
+      footer: [
+        {
+          type: 'button',
+          text: '打赏',
+          link: '/donate'
+        },
+        {
+          type: 'button',
+          text: '打赏',
+          link: '/donate'
+        }
+      ]
+    }]
+  ]
 }

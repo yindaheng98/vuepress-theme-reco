@@ -1,8 +1,9 @@
 export default {
-  homeBlog: {
-    article: 'Article',
-    tag: 'Tag',
-    category: 'Category',
-    friendLink: 'Friend Link'
-  }
+  all: 'All',
+  article: 'Articles',
+  tag: 'Tags',
+  category: 'Categories',
+  friendLink: 'Friend Links',
+  timeLine: 'TimeLine',
+  timeLineMsg: 'Yesterday Once More!'
 }

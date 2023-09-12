@@ -1,24 +1,29 @@
 <script>
+import { defineComponent, computed } from 'vue'
 import { isActive } from '@theme/helpers/utils'
+import { useInstance } from '@theme/helpers/composable'
 
-export default {
-  computed: {
-    headers () {
-      const headers = (this.$page.headers || []).filter(header => header.level === 2)
-      return headers
+export default defineComponent({
+  setup (props, ctx) {
+    const instance = useInstance()
+
+    const headers = computed(() => {
+      return instance.$showSubSideBar ? instance.$page.headers : []
+    })
+
+    const isLinkActive = (header) => {
+      const active = isActive(instance.$route, instance.$page.path + '#' + header.slug)
+      return active
     }
-  },
-  methods: {
-    isLinkActive (header) {
-      return isActive(this.$route, this.$page.path + '#' + header.slug)
-    }
+
+    return { headers, isLinkActive }
   },
   render (h) {
     return h('ul', {
       class: { 'sub-sidebar-wrapper': true },
-      style: { width: (this.$page.headers || []).length > 0 ? '12rem' : '0' }
+      style: { width: this.headers.length > 0 ? '12rem' : '0' }
     }, [
-      ...(this.$page.headers || []).map(header => {
+      ...this.headers.map(header => {
         return h('li', {
           class: {
             active: this.isLinkActive(header),
@@ -27,15 +32,14 @@ export default {
           attr: { key: header.title }
         }, [
           h('router-link', {
-            class: { 'sidebar-link': true },
+            class: { 'sidebar-link': true, [`reco-side-${header.slug}`]: true },
             props: { to: `${this.$page.path}#${header.slug}` }
           }, header.title)
         ])
       })
     ])
   }
-}
-
+})
 </script>
 
 <style lang="stylus" scoped>

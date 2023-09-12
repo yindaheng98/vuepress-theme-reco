@@ -1,156 +1,127 @@
 <template>
   <main class="page" :style="pageStyle">
-    <ModuleTransition>
-      <div v-show="recoShowModule && $page.title" class="page-title">
-        <h1>{{$page.title}}</h1>
-        <hr>
+    <section v-show="recoShowModule">
+      <div class="page-title">
+        <h1 class="title">{{$page.title}}</h1>
         <PageInfo :pageInfo="$page" :showAccessNumber="showAccessNumber"></PageInfo>
       </div>
-    </ModuleTransition>
+      <!-- 这里使用 v-show，否则影响 SSR -->
+      <Content class="theme-reco-content" />
+    </section>
 
-    <ModuleTransition delay="0.08">
-      <Content v-show="recoShowModule" class="theme-reco-content" />
-    </ModuleTransition>
-
-    <ModuleTransition delay="0.16">
-      <footer v-show="recoShowModule" class="page-edit">
-        <div
-          class="edit-link"
-          v-if="editLink"
-        >
-          <a
-            :href="editLink"
-            target="_blank"
-            rel="noopener noreferrer"
-          >{{ editLinkText }}</a>
-          <OutboundLink/>
-        </div>
-
-        <div
-          class="last-updated"
-          v-if="lastUpdated"
-        >
-          <span class="prefix">{{ lastUpdatedText }}: </span>
-          <span class="time">{{ lastUpdated }}</span>
-        </div>
-      </footer>
-    </ModuleTransition>
-
-    <ModuleTransition delay="0.24">
-      <div class="page-nav" v-if="recoShowModule && (prev || next)">
-        <p class="inner">
-          <span
-            v-if="prev"
-            class="prev"
-          >
-            ←
-            <router-link
-              v-if="prev"
-              class="prev"
-              :to="prev.path"
-            >
-              {{ prev.title || prev.path }}
-            </router-link>
-          </span>
-
-          <span
-            v-if="next"
-            class="next"
-          >
-            <router-link
-              v-if="next"
-              :to="next.path"
-            >
-              {{ next.title || next.path }}
-            </router-link>
-            →
-          </span>
-        </p>
+    <footer v-if="recoShowModule" class="page-edit">
+      <div class="edit-link" v-if="editLink">
+        <a
+          :href="editLink"
+          target="_blank"
+          rel="noopener noreferrer"
+        >{{ editLinkText }}</a>
+        <OutboundLink/>
       </div>
-    </ModuleTransition>
 
-    <ModuleTransition delay="0.32">
-      <Comments v-if="recoShowModule" :isShowComments="shouldShowComments"/>
-    </ModuleTransition>
+      <div
+        class="last-updated"
+        v-if="lastUpdated"
+      >
+        <span class="prefix">{{ lastUpdatedText }}: </span>
+        <span class="time">{{ lastUpdated }}</span>
+      </div>
+    </footer>
 
-    <ModuleTransition delay="0.4">
-      <SubSidebar class="side-bar" />
-    </ModuleTransition>
+    <div class="page-nav" v-if="recoShowModule && (prev || next)">
+      <p class="inner">
+        <span v-if="prev" class="prev">
+          <router-link v-if="prev" class="prev" :to="prev.path">
+            {{ prev.title || prev.path }}
+          </router-link>
+        </span>
+        <span v-if="next" class="next">
+          <router-link v-if="next" :to="next.path">
+            {{ next.title || next.path }}
+          </router-link>
+        </span>
+      </p>
+    </div>
+
+    <Comments v-if="recoShowModule" :isShowComments="shouldShowComments"/>
   </main>
 </template>
 
 <script>
+import { defineComponent, computed, toRefs } from 'vue'
 import PageInfo from '@theme/components/PageInfo'
 import { resolvePage, outboundRE, endingSlashRE } from '@theme/helpers/utils'
-import ModuleTransition from '@theme/components/ModuleTransition'
-import moduleTransitonMixin from '@theme/mixins/moduleTransiton'
-import SubSidebar from '@theme/components/SubSidebar'
+import { useInstance, useShowModule } from '@theme/helpers/composable'
 
-export default {
-  mixins: [moduleTransitonMixin],
-  components: { PageInfo, ModuleTransition, SubSidebar },
+export default defineComponent({
+  components: { PageInfo },
 
   props: ['sidebarItems'],
 
-  data () {
-    return {
-      isHasKey: true
-    }
-  },
+  setup (props, ctx) {
+    const instance = useInstance()
 
-  computed: {
+    const { sidebarItems } = toRefs(props)
+
+    const recoShowModule = useShowModule()
+
     // 是否显示评论
-    shouldShowComments () {
-      const { isShowComments } = this.$frontmatter
-      const { showComment } = this.$themeConfig.valineConfig || { showComment: true }
+    const shouldShowComments = computed(() => {
+      const { isShowComments } = instance.$frontmatter
+      const { showComment } = instance.$themeConfig.valineConfig || { showComment: true }
       return (showComment !== false && isShowComments !== false) || (showComment === false && isShowComments === true)
-    },
-    showAccessNumber () {
+    })
+
+    const showAccessNumber = computed(() => {
       const {
         $themeConfig: { valineConfig },
         $themeLocaleConfig: { valineConfig: valineLocalConfig }
-      } = this
+      } = instance || {}
 
       const vc = valineLocalConfig || valineConfig
-      if (vc && vc.visitor != false) {
-        return true
+
+      return vc && vc.visitor != false
+    })
+
+    const lastUpdated = computed(() => {
+      if (instance.$themeConfig.lastUpdated === false) return false
+      return instance.$page.lastUpdated
+    })
+
+    const lastUpdatedText = computed(() => {
+      if (typeof instance.$themeLocaleConfig.lastUpdated === 'string') {
+        return instance.$themeLocaleConfig.lastUpdated
       }
-      return false
-    },
-    lastUpdated () {
-      return this.$page.lastUpdated
-    },
-    lastUpdatedText () {
-      if (typeof this.$themeLocaleConfig.lastUpdated === 'string') {
-        return this.$themeLocaleConfig.lastUpdated
-      }
-      if (typeof this.$themeConfig.lastUpdated === 'string') {
-        return this.$themeConfig.lastUpdated
+      if (typeof instance.$themeConfig.lastUpdated === 'string') {
+        return instance.$themeConfig.lastUpdated
       }
       return 'Last Updated'
-    },
-    prev () {
-      const prev = this.$frontmatter.prev
-      if (prev === false) {
+    })
+
+    const prev = computed(() => {
+      const frontmatterPrev = instance.$frontmatter.prev
+      if (frontmatterPrev === false) {
         return
-      } else if (prev) {
-        return resolvePage(this.$site.pages, prev, this.$route.path)
+      } else if (frontmatterPrev) {
+        return resolvePage(instance.$site.pages, frontmatterPrev, instance.$route.path)
       } else {
-        return resolvePrev(this.$page, this.sidebarItems)
+        return resolvePrev(instance.$page, sidebarItems.value)
       }
-    },
-    next () {
-      const next = this.$frontmatter.next
+    })
+
+    const next = computed(() => {
+      const frontmatterNext = instance.$frontmatter.next
       if (next === false) {
         return
-      } else if (next) {
-        return resolvePage(this.$site.pages, next, this.$route.path)
+      } else if (frontmatterNext) {
+        return resolvePage(instance.$site.pages, frontmatterNext, instance.$route.path)
       } else {
-        return resolveNext(this.$page, this.sidebarItems)
+        return resolveNext(instance.$page, sidebarItems.value)
       }
-    },
-    editLink () {
-      if (this.$frontmatter.editLink === false) {
+    })
+
+    const editLink = computed(() => {
+      if (instance.$frontmatter.editLink === false) {
         return false
       }
       const {
@@ -159,53 +130,66 @@ export default {
         docsDir = '',
         docsBranch = 'master',
         docsRepo = repo
-      } = this.$themeConfig
+      } = instance.$themeConfig
 
-      if (docsRepo && editLinks && this.$page.relativePath) {
-        return this.createEditLink(repo, docsRepo, docsDir, docsBranch, this.$page.relativePath)
+      if (docsRepo && editLinks && instance.$page.relativePath) {
+        return createEditLink(repo, docsRepo, docsDir, docsBranch, instance.$page.relativePath)
       }
       return ''
-    },
-    editLinkText () {
-      return (
-        this.$themeLocaleConfig.editLinkText || this.$themeConfig.editLinkText || `Edit this page`
-      )
-    },
-    pageStyle () {
-      const headers = this.$page.headers || []
-      return headers.length > 0 ? {} : { paddingRight: '0' }
-    }
-  },
+    })
 
-  methods: {
-    createEditLink (repo, docsRepo, docsDir, docsBranch, path) {
-      const bitbucket = /bitbucket.org/
-      if (bitbucket.test(repo)) {
-        const base = outboundRE.test(docsRepo)
-          ? docsRepo
-          : repo
-        return (
-          base.replace(endingSlashRE, '') +
-           `/src` +
-           `/${docsBranch}/` +
-           (docsDir ? docsDir.replace(endingSlashRE, '') + '/' : '') +
-           path +
-           `?mode=edit&spa=0&at=${docsBranch}&fileviewer=file-view-default`
-        )
-      }
-
-      const base = outboundRE.test(docsRepo)
-        ? docsRepo
-        : `https://github.com/${docsRepo}`
+    const editLinkText = computed(() => {
       return (
-        base.replace(endingSlashRE, '') +
-        `/edit` +
-        `/${docsBranch}/` +
-        (docsDir ? docsDir.replace(endingSlashRE, '') + '/' : '') +
-        path
+        instance.$themeLocaleConfig.editLinkText || instance.$themeConfig.editLinkText || `Edit this page`
       )
+    })
+
+    const pageStyle = computed(() => {
+      return instance.$showSubSideBar ? {} : { paddingRight: '0' }
+    })
+
+    return {
+      recoShowModule,
+      shouldShowComments,
+      showAccessNumber,
+      lastUpdated,
+      lastUpdatedText,
+      prev,
+      next,
+      editLink,
+      editLinkText,
+      pageStyle
     }
   }
+})
+
+function createEditLink (repo, docsRepo, docsDir, docsBranch, path) {
+  const bitbucket = /bitbucket.org/
+  if (bitbucket.test(repo)) {
+    const base = outboundRE.test(docsRepo)
+      ? docsRepo
+      : repo
+    return (
+      base.replace(endingSlashRE, '') +
+        `/src` +
+        `/${docsBranch}/` +
+        (docsDir ? docsDir.replace(endingSlashRE, '') + '/' : '') +
+        path +
+        `?mode=edit&spa=0&at=${docsBranch}&fileviewer=file-view-default`
+    )
+  }
+
+  const base = outboundRE.test(docsRepo)
+    ? docsRepo
+    : `https://github.com/${docsRepo}`
+
+  return (
+    base.replace(endingSlashRE, '') +
+    `/edit` +
+    `/${docsBranch}/` +
+    (docsDir ? docsDir.replace(endingSlashRE, '') + '/' : '') +
+    path
+  )
 }
 
 function resolvePrev (page, items) {
@@ -248,20 +232,22 @@ function flatten (items, res) {
   padding-bottom 2rem
   padding-right 14rem
   display block
-  .side-bar
-    position fixed
-    top 10rem
-    bottom 10rem
-    right 2rem
-    overflow-y scroll
-    &::-webkit-scrollbar
-      width: 0
-      height: 0
   .page-title
     max-width: $contentWidth;
     margin: 0 auto;
     padding: 1rem 2.5rem;
     color var(--text-color)
+  .theme-reco-content h2
+    position relative
+    padding-left 0.8rem
+    &::before
+      position absolute
+      left 0
+      top 3.5rem
+      display block
+      height 1.8rem
+      content ''
+      border-left 5px solid $accentColor
   .page-edit
     @extend $wrapper
     padding-top 1rem
@@ -300,8 +286,6 @@ function flatten (items, res) {
 @media (max-width: $MQMobile)
   .page
     padding-right 0
-    .side-bar
-      display none
     .page-title
       padding: 0 1rem;
     .page-edit

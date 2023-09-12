@@ -1,111 +1,78 @@
 <template>
   <Common class="categories-wrapper" :sidebar="false">
     <!-- 分类集合 -->
-    <ModuleTransition>
-      <ul v-show="recoShowModule" class="category-wrapper">
-        <li
-          class="category-item"
-          :class="title == item.name ? 'active': ''"
-          v-for="(item, index) in this.$categories.list"
-          :key="index">
-          <router-link :to="item.path">
-            <span class="category-name">{{ item.name }}</span>
-            <span class="post-num" :style="{ 'backgroundColor': getOneColor() }">{{ item.pages.length }}</span>
-          </router-link>
-        </li>
-      </ul>
-    </ModuleTransition>
+    <ul class="category-wrapper">
+      <li
+        class="category-item"
+        :class="title == item.name ? 'active': ''"
+        v-for="(item, index) in $categoriesList"
+        v-show="item.pages.length > 0"
+        :key="index">
+        <router-link :to="item.path">
+          <span class="category-name">{{ item.name }}</span>
+          <span class="post-num" :style="{ 'backgroundColor': getOneColor() }">{{ item.pages.length }}</span>
+        </router-link>
+      </li>
+    </ul>
 
     <!-- 博客列表 -->
-    <ModuleTransition delay="0.08">
-      <note-abstract
-        v-show="recoShowModule"
-        class="list"
-        :data="posts"
-        :currentPage="currentPage"
-        @currentTag="getCurrentTag"></note-abstract>
-    </ModuleTransition>
-
-    <!-- 分页 -->
-    <ModuleTransition delay="0.16">
-      <pagation
-        class="pagation"
-        :total="posts.length"
-        :currentPage="currentPage"
-        @getCurrentPage="getCurrentPage"></pagation>
-    </ModuleTransition>
+    <note-abstract
+      class="list"
+      :data="posts"
+      @paginationChange="paginationChange"
+    ></note-abstract>
   </Common>
 </template>
 
 <script>
+import { defineComponent, computed } from 'vue'
 import Common from '@theme/components/Common'
 import NoteAbstract from '@theme/components/NoteAbstract'
-import ModuleTransition from '@theme/components/ModuleTransition'
-import pagination from '@theme/mixins/pagination'
 import { sortPostsByStickyAndDate, filterPosts } from '@theme/helpers/postData'
 import { getOneColor } from '@theme/helpers/other'
-import moduleTransitonMixin from '@theme/mixins/moduleTransiton'
+import { useInstance } from '@theme/helpers/composable'
 
-export default {
-  mixins: [pagination, moduleTransitonMixin],
-  components: { Common, NoteAbstract, ModuleTransition },
+export default defineComponent({
+  components: { Common, NoteAbstract },
 
-  data () {
-    return {
-      currentPage: 1
-    }
-  },
+  setup (_, ctx) {
+    const instance = useInstance()
 
-  computed: {
-    // 时间降序后的博客列表
-    posts () {
-      let posts = this.$currentCategories.pages
+    const posts = computed(() => {
+      let posts = instance.$currentCategories.pages
       posts = filterPosts(posts)
       sortPostsByStickyAndDate(posts)
       return posts
-    },
-    // 标题只显示分类名称
-    title () {
-      return this.$currentCategories.key
+    })
+
+    const title = computed(() => {
+      return instance.$currentCategories.key
+    })
+
+    const getCurrentTag = (tag) => {
+      ctx.emit('currentTag', tag)
     }
-  },
 
-  mounted () {
-    this._setPage(this._getStoragePage())
-  },
-
-  methods: {
-    // 获取当前tag
-    getCurrentTag (tag) {
-      this.$emit('currentTag', tag)
-    },
-    // 获取当前页码
-    getCurrentPage (page) {
-      this._setPage(page)
+    const paginationChange = (page) => {
       setTimeout(() => {
         window.scrollTo(0, 0)
       }, 100)
-    },
-    _setPage (page) {
-      this.currentPage = page
-      this.$page.currentPage = page
-      this._setStoragePage(page)
-    },
-    getOneColor
-  },
+    }
 
-  watch: {
-    $route () {
-      this._setPage(this._getStoragePage())
+    return {
+      posts,
+      title,
+      getOneColor,
+      getCurrentTag,
+      paginationChange
     }
   }
-}
+})
 </script>
 
 <style src="../styles/theme.styl" lang="stylus"></style>
-
+<style src="prismjs/themes/prism-tomorrow.css"></style>
 <style lang="stylus" scoped>
-@require '../styles/mode.styl'
 .categories-wrapper
   max-width: $contentWidth;
   margin: 0 auto;

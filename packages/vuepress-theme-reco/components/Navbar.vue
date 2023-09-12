@@ -33,58 +33,63 @@
 </template>
 
 <script>
+import { defineComponent, ref, onMounted, computed } from 'vue'
 import AlgoliaSearchBox from '@AlgoliaSearchBox'
 import SearchBox from '@SearchBox'
 import SidebarButton from '@theme/components/SidebarButton'
 import NavLinks from '@theme/components/NavLinks'
 import Mode from '@theme/components/Mode'
+import { useInstance } from '@theme/helpers/composable'
 
-export default {
+export default defineComponent({
   components: { SidebarButton, NavLinks, SearchBox, AlgoliaSearchBox, Mode },
 
-  data () {
-    return {
-      linksWrapMaxWidth: null
-    }
-  },
+  setup (props, ctx) {
+    const instance = useInstance()
+    const linksWrapMaxWidth = ref(null)
 
-  mounted () {
-    const MOBILE_DESKTOP_BREAKPOINT = 719 // refer to config.styl
-    const NAVBAR_VERTICAL_PADDING = parseInt(css(this.$el, 'paddingLeft')) + parseInt(css(this.$el, 'paddingRight'))
-    const handleLinksWrapWidth = () => {
-      if (document.documentElement.clientWidth < MOBILE_DESKTOP_BREAKPOINT) {
-        this.linksWrapMaxWidth = null
-      } else {
-        this.linksWrapMaxWidth = this.$el.offsetWidth - NAVBAR_VERTICAL_PADDING -
-          (this.$refs.siteName && this.$refs.siteName.offsetWidth || 0)
+    const algolia = computed(() => {
+      return instance.$themeLocaleConfig.algolia || instance.$themeConfig.algolia || {}
+    })
+
+    const isAlgoliaSearch = computed(() => {
+      return algolia.value && algolia.value.apiKey && algolia.value.indexName
+    })
+
+    function css (el, property) {
+      // NOTE: Known bug, will return 'auto' if style value is 'auto'
+      const win = el.ownerDocument.defaultView
+      // null means not to return pseudo styles
+      return win.getComputedStyle(el, null)[property]
+    }
+
+    onMounted(() => {
+      const MOBILE_DESKTOP_BREAKPOINT = 719 // refer to config.styl
+      const NAVBAR_VERTICAL_PADDING =
+        parseInt(css(instance.$el, 'paddingLeft')) +
+        parseInt(css(instance.$el, 'paddingRight'))
+
+      const handleLinksWrapWidth = () => {
+        if (document.documentElement.clientWidth < MOBILE_DESKTOP_BREAKPOINT) {
+          linksWrapMaxWidth.value = null
+        } else {
+          linksWrapMaxWidth.value =
+            instance.$el.offsetWidth -
+            NAVBAR_VERTICAL_PADDING -
+            (instance.$refs.siteName && instance.$refs.siteName.offsetWidth || 0)
+        }
       }
-    }
-    handleLinksWrapWidth()
-    window.addEventListener('resize', handleLinksWrapWidth, false)
-  },
 
-  computed: {
-    algolia () {
-      return this.$themeLocaleConfig.algolia || this.$themeConfig.algolia || {}
-    },
+      handleLinksWrapWidth()
+      window.addEventListener('resize', handleLinksWrapWidth, false)
+    })
 
-    isAlgoliaSearch () {
-      return this.algolia && this.algolia.apiKey && this.algolia.indexName
-    }
+    return { linksWrapMaxWidth, algolia, isAlgoliaSearch, css }
   }
-}
-
-function css (el, property) {
-  // NOTE: Known bug, will return 'auto' if style value is 'auto'
-  const win = el.ownerDocument.defaultView
-  // null means not to return pseudo styles
-  return win.getComputedStyle(el, null)[property]
-}
+})
 </script>
 
 <style lang="stylus">
-@require '../styles/mode.styl'
-
 $navbar-vertical-padding = 0.7rem
 $navbar-horizontal-padding = 1.5rem
 
@@ -106,7 +111,6 @@ $navbar-horizontal-padding = 1.5rem
     font-weight 600
     color var(--text-color)
     position relative
-    background var(--background-color)
   .links
     padding-left 1.5rem
     box-sizing border-box

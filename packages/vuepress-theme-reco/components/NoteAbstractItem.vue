@@ -2,9 +2,9 @@
   <div
     class="abstract-item"
     @click="$router.push(item.path)">
-    <i v-if="item.frontmatter.sticky" class="iconfont reco-sticky"></i>
+    <reco-icon v-if="item.frontmatter.sticky" icon="reco-sticky" />
     <div class="title">
-      <i v-if="item.frontmatter.keys" class="iconfont reco-lock"></i>
+      <reco-icon v-if="item.frontmatter.keys" icon="reco-lock" />
       <router-link :to="item.path">{{item.title}}</router-link>
     </div>
     <div v-if="item.frontmatter.cover" class="cover">
@@ -13,7 +13,6 @@
         alt="封面" class="cover-img">
     </div>
     <div class="abstract" v-html="item.excerpt"></div>
-    <hr class="hr">
     <PageInfo
       :pageInfo="item"
       :currentTag="currentTag">
@@ -22,15 +21,16 @@
 </template>
 
 <script>
+import { defineComponent } from 'vue'
+import { RecoIcon } from '@vuepress-reco/core/lib/components'
 import PageInfo from './PageInfo'
-export default {
-  components: { PageInfo },
+export default defineComponent({
+  components: { PageInfo, RecoIcon },
   props: ['item', 'currentPage', 'currentTag']
-}
+})
 </script>
 
 <style lang="stylus" scoped>
-@require '../styles/mode.styl'
 .abstract-item
   position relative
   margin: 0 auto 20px;
@@ -58,8 +58,10 @@ export default {
   .title
     position: relative;
     font-size: 1.28rem;
-    line-height: 36px;
+    line-height: 46px;
     display: inline-block;
+    a
+      color: var(--text-color);
     .reco-lock
       font-size 1.28rem
       color $accentColor
